@@ -51,6 +51,13 @@ const createBooking = async (req, res, next) => {
       });
     }
 
+    if (startTime >= endTime) {
+      return res.status(400).json({
+        success: false,
+        message: 'End time must be after start time',
+      });
+    }
+
     if (mongoose.connection.readyState === 1) {
       const equipmentDoc = await Equipment.findById(equipmentId);
       if (!equipmentDoc) {

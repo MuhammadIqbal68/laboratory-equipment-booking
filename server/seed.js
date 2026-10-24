@@ -8,11 +8,12 @@ dotenv.config();
 
 const seedData = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB Connected for seeding...');
+    const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/lab-booking';
+    await mongoose.connect(uri);
+    console.log(`MongoDB Connected for seeding (${uri})...`);
 
     // Create admin user if doesn't exist
-    const adminExists = await User.findOne({ role: 'admin' });
+    const adminExists = await User.findOne({ email: 'admin@lab.com' });
     if (!adminExists) {
       await User.create({
         name: 'Lab Administrator',
@@ -24,6 +25,21 @@ const seedData = async () => {
       console.log('✓ Admin user created (email: admin@lab.com, password: admin123)');
     } else {
       console.log('→ Admin user already exists, skipping...');
+    }
+
+    // Create demo student if doesn't exist
+    const studentExists = await User.findOne({ email: 'student@university.ac.za' });
+    if (!studentExists) {
+      await User.create({
+        name: 'Alex Johnson',
+        email: 'student@university.ac.za',
+        password: 'student123',
+        studentId: 'STU2024098',
+        role: 'student',
+      });
+      console.log('✓ Demo student created (email: student@university.ac.za, password: student123)');
+    } else {
+      console.log('→ Demo student already exists, skipping...');
     }
 
     // Create sample equipment if none exists

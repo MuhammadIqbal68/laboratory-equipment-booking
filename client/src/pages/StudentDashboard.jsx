@@ -124,6 +124,7 @@ const StudentDashboard = () => {
                   <th>Date</th>
                   <th>Time Slot</th>
                   <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,6 +136,11 @@ const StudentDashboard = () => {
                     <td>{formatTime(b.startTime)} - {formatTime(b.endTime)}</td>
                     <td>
                       <StatusBadge status={b.status} />
+                    </td>
+                    <td>
+                      <Link to="/my-bookings" className="btn btn--secondary btn--sm">
+                        View <HiOutlineArrowRight size={12} />
+                      </Link>
                     </td>
                   </tr>
                 ))}

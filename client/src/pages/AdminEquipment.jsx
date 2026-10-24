@@ -14,6 +14,7 @@ import {
   HiOutlinePencil,
   HiOutlineTrash,
   HiOutlineSearch,
+  HiOutlineEye,
 } from 'react-icons/hi';
 
 const AdminEquipment = () => {
@@ -25,8 +26,13 @@ const AdminEquipment = () => {
   // Search & Filter
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [condition, setCondition] = useState('');
+  const [available, setAvailable] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // View Details Modal
+  const [viewingItem, setViewingItem] = useState(null);
 
   // Add/Edit Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,6 +42,7 @@ const AdminEquipment = () => {
     description: '',
     category: 'Chemistry',
     totalQuantity: 1,
+    availableQuantity: 1,
     laboratory: '',
     condition: 'Good',
     isAvailable: true,
@@ -53,6 +60,8 @@ const AdminEquipment = () => {
       const params = { page, limit: 10 };
       if (search) params.search = search;
       if (category) params.category = category;
+      if (condition) params.condition = condition;
+      if (available) params.available = available;
       const res = await getEquipment(params);
       setEquipmentList(res.data.data);
       setTotalPages(res.data.pagination.pages || 1);
@@ -65,7 +74,7 @@ const AdminEquipment = () => {
 
   useEffect(() => {
     fetchEquipment();
-  }, [page, category]);
+  }, [page, category, condition, available]);
 
   const handleOpenAdd = () => {
     setEditingItem(null);
@@ -74,6 +83,7 @@ const AdminEquipment = () => {
       description: '',
       category: 'Chemistry',
       totalQuantity: 1,
+      availableQuantity: 1,
       laboratory: '',
       condition: 'Good',
       isAvailable: true,
@@ -89,6 +99,7 @@ const AdminEquipment = () => {
       description: item.description,
       category: item.category,
       totalQuantity: item.totalQuantity,
+      availableQuantity: item.availableQuantity,
       laboratory: item.laboratory,
       condition: item.condition,
       isAvailable: item.isAvailable,
@@ -111,6 +122,7 @@ const AdminEquipment = () => {
       const payload = {
         ...formData,
         totalQuantity: Number(formData.totalQuantity),
+        availableQuantity: Number(formData.availableQuantity),
       };
 
       if (editingItem) {
@@ -162,7 +174,7 @@ const AdminEquipment = () => {
 
       {/* Filters */}
       <div className="card mb-lg" style={{ padding: '16px' }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: '220px', display: 'flex', gap: '8px' }}>
             <input
               type="text"
@@ -178,7 +190,7 @@ const AdminEquipment = () => {
 
           <select
             className="form-select"
-            style={{ width: '200px' }}
+            style={{ width: '180px' }}
             value={category}
             onChange={(e) => { setCategory(e.target.value); setPage(1); }}
           >
@@ -187,6 +199,45 @@ const AdminEquipment = () => {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+
+          <select
+            className="form-select"
+            style={{ width: '170px' }}
+            value={condition}
+            onChange={(e) => { setCondition(e.target.value); setPage(1); }}
+          >
+            <option value="">All Conditions</option>
+            {CONDITIONS.map((cond) => (
+              <option key={cond} value={cond}>{cond}</option>
+            ))}
+          </select>
+
+          <select
+            className="form-select"
+            style={{ width: '160px' }}
+            value={available}
+            onChange={(e) => { setAvailable(e.target.value); setPage(1); }}
+          >
+            <option value="">All Statuses</option>
+            <option value="true">Available</option>
+            <option value="false">Unavailable</option>
+          </select>
+
+          {(search || category || condition || available) && (
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              onClick={() => {
+                setSearch('');
+                setCategory('');
+                setCondition('');
+                setAvailable('');
+                setPage(1);
+              }}
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
@@ -238,6 +289,14 @@ const AdminEquipment = () => {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="btn btn--secondary btn--sm"
+                        onClick={() => setViewingItem(item)}
+                        title="View Details"
+                        id={`view-eq-${item._id}`}
+                      >
+                        <HiOutlineEye size={16} />
+                      </button>
                       <button
                         className="btn btn--ghost btn--sm"
                         onClick={() => handleOpenEdit(item)}
@@ -330,7 +389,7 @@ const AdminEquipment = () => {
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: editingItem ? '1fr 1fr 1fr' : '1fr 1fr', gap: '16px' }}>
             <div className="form-group">
               <label className="form-label" htmlFor="eq-category">Category</label>
               <select
@@ -360,6 +419,23 @@ const AdminEquipment = () => {
                 required
               />
             </div>
+
+            {editingItem && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="eq-avail-qty">Available Qty</label>
+                <input
+                  type="number"
+                  id="eq-avail-qty"
+                  name="availableQuantity"
+                  min="0"
+                  max={formData.totalQuantity}
+                  className="form-input"
+                  value={formData.availableQuantity}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -454,6 +530,74 @@ const AdminEquipment = () => {
         <p style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           This will remove the item from university records. Existing booking logs will remain unaffected.
         </p>
+      </Modal>
+
+      {/* View Equipment Details Modal */}
+      <Modal
+        isOpen={!!viewingItem}
+        onClose={() => setViewingItem(null)}
+        title={viewingItem ? viewingItem.name : 'Equipment Details'}
+        footer={
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              className="btn btn--secondary btn--sm"
+              onClick={() => {
+                const item = viewingItem;
+                setViewingItem(null);
+                handleOpenEdit(item);
+              }}
+            >
+              <HiOutlinePencil size={14} /> Edit Equipment
+            </button>
+            <button className="btn btn--primary btn--sm" onClick={() => setViewingItem(null)}>
+              Close
+            </button>
+          </div>
+        }
+      >
+        {viewingItem && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Category</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingItem.category}</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Laboratory Location</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingItem.laboratory}</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Inventory</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingItem.totalQuantity} units</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Available Quantity</span>
+                <div style={{ fontWeight: 600, marginTop: '2px', color: viewingItem.availableQuantity > 0 ? 'var(--status-approved)' : 'var(--status-rejected)' }}>
+                  {viewingItem.availableQuantity} units
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Physical Condition</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingItem.condition}</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Status</span>
+                <div style={{ marginTop: '2px' }}>
+                  {viewingItem.isAvailable && viewingItem.availableQuantity > 0 ? (
+                    <span className="badge badge--approved">Available for Booking</span>
+                  ) : (
+                    <span className="badge badge--rejected">Unavailable</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', marginTop: '12px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Description</span>
+              <p style={{ marginTop: '4px', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>{viewingItem.description}</p>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

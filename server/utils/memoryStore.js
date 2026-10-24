@@ -289,8 +289,13 @@ const memoryStore = {
 
     const existing = equipment[idx];
     const totalQty = data.totalQuantity !== undefined ? Number(data.totalQuantity) : existing.totalQuantity;
-    const diff = totalQty - existing.totalQuantity;
-    const availableQty = Math.max(0, existing.availableQuantity + diff);
+    let availableQty;
+    if (data.availableQuantity !== undefined) {
+      availableQty = Math.max(0, Math.min(Number(data.availableQuantity), totalQty));
+    } else {
+      const diff = totalQty - existing.totalQuantity;
+      availableQty = Math.max(0, existing.availableQuantity + diff);
+    }
 
     const updated = {
       ...existing,

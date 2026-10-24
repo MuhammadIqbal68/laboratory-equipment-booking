@@ -180,7 +180,6 @@ npm install
 ### Step 4: Seed Initial Data (Optional)
 The system includes an automatic database seed with sample laboratory equipment and an initial administrator account:
 ```bash
-cd server
 npm run seed
 ```
 
@@ -194,42 +193,53 @@ npm run seed
 
 ### Step 5: Run the Application Locally
 
-1. **Start the Express API backend**:
-   ```bash
-   cd server
-   npm start
-   # Server runs on http://localhost:5000
-   ```
+You can now run both the frontend and backend with a single command from the root directory:
 
-2. **Start the React frontend**:
-   ```bash
-   cd client
-   npm run dev
-   # Application opens at http://localhost:5173
-   ```
+```bash
+# Install all dependencies (root, client, server)
+npm run install:all
+
+# Launch both Backend (port 5000) and Frontend (port 5173) concurrently:
+npm run dev
+```
+
+- **Frontend Application**: [http://localhost:5173](http://localhost:5173)
+- **Backend API**: [http://localhost:5000/api](http://localhost:5000/api)
 
 ---
 
-## 6. Deployment Guide
+## 6. Vercel Deployment Guide
 
-### Backend Deployment (e.g., Render / Railway)
-1. Push your project to a public GitHub repository.
-2. Create a new **Web Service** pointing to your repository.
-3. Set the Root Directory to `server`.
-4. Configure Build Command: `npm install`.
-5. Configure Start Command: `npm start`.
-6. Add Environment Variables in the hosting dashboard:
-   - `MONGO_URI`: Your MongoDB Atlas connection URI
-   - `JWT_SECRET`: A long random secret string
+This project includes pre-configured [`vercel.json`](file:///d:/DevSynt%20projects/final%20project/vercel.json) and [`api/index.js`](file:///d:/DevSynt%20projects/final%20project/api/index.js) so you can deploy the complete full-stack application (React frontend + Express serverless API) directly to Vercel in a few simple steps.
+
+### Step-by-Step Vercel Deployment:
+
+1. **Push to GitHub**:
+   Push this project to your GitHub repository:
+   ```bash
+   git add .
+   git commit -m "Complete LabBook system with full admin features and Vercel config"
+   git push origin main
+   ```
+
+2. **Import into Vercel**:
+   - Go to [vercel.com](https://vercel.com) and log in.
+   - Click **"Add New..."** > **"Project"**.
+   - Select your GitHub repository.
+   - **Root Directory**: Leave as `./` (default).
+
+3. **Configure Environment Variables in Vercel**:
+   In the **Environment Variables** section on Vercel, add:
+   - `MONGO_URI`: Your MongoDB Atlas connection string (e.g. `mongodb+srv://<user>:<password>@cluster0.xxxx.mongodb.net/lab-booking?retryWrites=true&w=majority`)
+   - `JWT_SECRET`: A secure string (e.g. `your_custom_production_jwt_secret_key_2026`)
    - `NODE_ENV`: `production`
-   - `CLIENT_URL`: The production URL of your deployed React frontend
 
-### Frontend Deployment (e.g., Vercel / Netlify / Render)
-1. Create a new site pointing to the `client` directory.
-2. Set Build Command: `npm run build`.
-3. Set Output Directory: `dist`.
-4. Set Environment Variable:
-   - `VITE_API_URL`: `https://your-backend-api-url.onrender.com/api`
+   *(Note: If you haven't set up MongoDB Atlas yet, the backend automatically uses the built-in fast in-memory persistence store, allowing your demo on Vercel to work immediately!)*
+
+4. **Deploy**:
+   - Click **Deploy**.
+   - Vercel will build the React frontend and deploy the Express API serverless routes automatically.
+   - You will receive a live URL: `https://your-project.vercel.app`
 
 ---
 

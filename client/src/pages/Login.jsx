@@ -90,6 +90,16 @@ const Login = () => {
           </button>
         </form>
 
+        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
+          <div style={{ background: 'var(--gray-50)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', fontSize: '0.8rem' }}>
+            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Registered Accounts for Testing:</span>
+            <div style={{ marginTop: '6px', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
+              <div>🛡️ <strong>Administrator:</strong> <code>admin@lab.com</code> (Password: <code>admin123</code>)</div>
+              <div style={{ marginTop: '3px' }}>🎓 <strong>Student:</strong> <code>student@university.ac.za</code> (Password: <code>student123</code>)</div>
+            </div>
+          </div>
+        </div>
+
         <div className="auth-card__footer">
           Don&apos;t have an account? <Link to="/register">Create one</Link>
         </div>

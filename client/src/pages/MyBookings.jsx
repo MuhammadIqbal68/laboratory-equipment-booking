@@ -5,7 +5,7 @@ import Alert from '../components/common/Alert';
 import StatusBadge from '../components/common/StatusBadge';
 import Modal from '../components/common/Modal';
 import { formatDate, formatTime, BOOKING_STATUSES } from '../utils/helpers';
-import { HiOutlineBan, HiOutlineCalendar, HiOutlineInformationCircle } from 'react-icons/hi';
+import { HiOutlineBan, HiOutlineCalendar, HiOutlineInformationCircle, HiOutlineEye } from 'react-icons/hi';
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -19,6 +19,9 @@ const MyBookings = () => {
   // Cancellation Modal
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+
+  // View Details Modal
+  const [viewingBooking, setViewingBooking] = useState(null);
 
   const fetchBookings = async () => {
     try {
@@ -130,17 +133,25 @@ const MyBookings = () => {
                     <StatusBadge status={b.status} />
                   </td>
                   <td>
-                    {b.status === 'Pending' ? (
+                    <div style={{ display: 'flex', gap: '6px' }}>
                       <button
-                        className="btn btn--danger btn--sm"
-                        onClick={() => setSelectedBooking(b)}
-                        id={`cancel-booking-${b._id}`}
+                        className="btn btn--secondary btn--sm"
+                        onClick={() => setViewingBooking(b)}
+                        title="View Details"
+                        id={`view-my-booking-${b._id}`}
                       >
-                        <HiOutlineBan size={14} /> Cancel
+                        <HiOutlineEye size={14} /> View
                       </button>
-                    ) : (
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>No actions</span>
-                    )}
+                      {b.status === 'Pending' && (
+                        <button
+                          className="btn btn--danger btn--sm"
+                          onClick={() => setSelectedBooking(b)}
+                          id={`cancel-booking-${b._id}`}
+                        >
+                          <HiOutlineBan size={14} /> Cancel
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -178,6 +189,93 @@ const MyBookings = () => {
         <p style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           This action will release the slot and cannot be undone.
         </p>
+      </Modal>
+
+      {/* View Booking Details Modal */}
+      <Modal
+        isOpen={!!viewingBooking}
+        onClose={() => setViewingBooking(null)}
+        title="Booking Details"
+        footer={
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {viewingBooking?.status === 'Pending' && (
+              <button
+                className="btn btn--danger btn--sm"
+                onClick={() => {
+                  const b = viewingBooking;
+                  setViewingBooking(null);
+                  setSelectedBooking(b);
+                }}
+              >
+                <HiOutlineBan size={14} /> Cancel Booking
+              </button>
+            )}
+            <button className="btn btn--primary btn--sm" onClick={() => setViewingBooking(null)}>
+              Close
+            </button>
+          </div>
+        }
+      >
+        {viewingBooking && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Equipment</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingBooking.equipment?.name || 'N/A'}</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Laboratory</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingBooking.equipment?.laboratory || 'N/A'}</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Date & Time</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>
+                  {formatDate(viewingBooking.date)} ({formatTime(viewingBooking.startTime)} - {formatTime(viewingBooking.endTime)})
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Quantity</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{viewingBooking.quantity} unit(s)</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Status</span>
+                <div style={{ marginTop: '2px' }}>
+                  <StatusBadge status={viewingBooking.status} />
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Submitted On</span>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{formatDate(viewingBooking.createdAt)}</div>
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', marginTop: '12px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Academic Purpose</span>
+              <p style={{ marginTop: '4px', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                {viewingBooking.purpose}
+              </p>
+            </div>
+
+            {viewingBooking.adminNotes && (
+              <div
+                style={{
+                  marginTop: '14px',
+                  padding: '12px',
+                  background: viewingBooking.status === 'Rejected' ? '#FEE2E2' : 'var(--gray-50)',
+                  borderRadius: 'var(--radius-md)',
+                  border: `1px solid ${viewingBooking.status === 'Rejected' ? '#FCA5A5' : 'var(--border-light)'}`,
+                }}
+              >
+                <span style={{ fontSize: '0.75rem', color: viewingBooking.status === 'Rejected' ? '#991B1B' : 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>
+                  {viewingBooking.status === 'Rejected' ? 'Reason for Rejection' : 'Administrator Remarks'}
+                </span>
+                <p style={{ marginTop: '4px', fontSize: '0.9rem', color: viewingBooking.status === 'Rejected' ? '#B91C1C' : 'var(--text-secondary)' }}>
+                  {viewingBooking.adminNotes}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );

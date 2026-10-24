@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { loginUser } from '../api/services';
 import {
   HiOutlineBeaker,
   HiOutlineCalendar,
@@ -12,33 +11,13 @@ import {
 } from 'react-icons/hi';
 
 const Home = () => {
-  const { isAuthenticated, user, login } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   if (isAuthenticated) {
     navigate(user?.role === 'admin' ? '/admin' : '/dashboard');
     return null;
   }
-
-  const handleAdminDirectLogin = async () => {
-    try {
-      const res = await loginUser({ email: 'admin@lab.com', password: 'admin123' });
-      login(res.data.data);
-      navigate('/admin');
-    } catch (err) {
-      navigate('/login');
-    }
-  };
-
-  const handleStudentDirectLogin = async () => {
-    try {
-      const res = await loginUser({ email: 'student@university.ac.za', password: 'student123' });
-      login(res.data.data);
-      navigate('/dashboard');
-    } catch (err) {
-      navigate('/login');
-    }
-  };
 
   const features = [
     {
@@ -84,22 +63,22 @@ const Home = () => {
             while laboratory administrators oversee inventory and manage bookings.
           </p>
           <div className="hero__actions animate-in" style={{ animationDelay: '0.2s', gap: '12px' }}>
-            <button
-              onClick={handleStudentDirectLogin}
+            <Link
+              to="/login"
               className="btn btn--primary btn--lg"
               id="hero-student-portal"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              🎓 Enter Student Portal
-            </button>
-            <button
-              onClick={handleAdminDirectLogin}
+              🎓 Student Portal
+            </Link>
+            <Link
+              to="/login"
               className="btn btn--secondary btn--lg"
               id="hero-admin-portal"
               style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.2)' }}
             >
-              <HiOutlineShieldCheck size={20} /> Enter Admin Section
-            </button>
+              <HiOutlineShieldCheck size={20} /> Administrator Section
+            </Link>
           </div>
         </div>
       </section>
@@ -108,7 +87,11 @@ const Home = () => {
       <div style={{ maxWidth: '1000px', margin: '-40px auto 40px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div className="content-grid content-grid--2">
           {/* Student Card */}
-          <div className="card card--clickable" onClick={handleStudentDirectLogin} style={{ borderTop: '4px solid var(--primary-400)' }}>
+          <Link
+            to="/login"
+            className="card card--clickable"
+            style={{ borderTop: '4px solid var(--primary-400)', textDecoration: 'none', color: 'inherit', display: 'block' }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span style={{ fontSize: '2rem' }}>🎓</span>
               <div>
@@ -120,12 +103,16 @@ const Home = () => {
               Browse scientific equipment, check live availability, submit booking requests with purpose notes, and track your active sessions.
             </p>
             <div style={{ color: 'var(--primary-600)', fontWeight: 600, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              Go to Student Dashboard <HiOutlineArrowRight />
+              Sign In to Student Dashboard <HiOutlineArrowRight />
             </div>
-          </div>
+          </Link>
 
           {/* Admin Card */}
-          <div className="card card--clickable" onClick={handleAdminDirectLogin} style={{ borderTop: '4px solid #EA580C' }}>
+          <Link
+            to="/login"
+            className="card card--clickable"
+            style={{ borderTop: '4px solid #EA580C', textDecoration: 'none', color: 'inherit', display: 'block' }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span style={{ fontSize: '2rem' }}>🛡️</span>
               <div>
@@ -137,9 +124,9 @@ const Home = () => {
               Manage laboratory equipment inventory (add/edit/delete), review pending student requests, approve/reject bookings, and monitor lab usage.
             </p>
             <div style={{ color: 'var(--primary-600)', fontWeight: 600, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              Open Admin Section <HiOutlineArrowRight />
+              Sign In to Administrator Console <HiOutlineArrowRight />
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 

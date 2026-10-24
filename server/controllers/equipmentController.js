@@ -130,7 +130,10 @@ const updateEquipment = async (req, res, next) => {
         return res.status(404).json({ success: false, message: 'Equipment not found' });
       }
 
-      if (req.body.totalQuantity !== undefined) {
+      if (req.body.availableQuantity !== undefined) {
+        const total = req.body.totalQuantity !== undefined ? Number(req.body.totalQuantity) : equipment.totalQuantity;
+        req.body.availableQuantity = Math.max(0, Math.min(Number(req.body.availableQuantity), total));
+      } else if (req.body.totalQuantity !== undefined) {
         const diff = req.body.totalQuantity - equipment.totalQuantity;
         req.body.availableQuantity = Math.max(0, equipment.availableQuantity + diff);
       }

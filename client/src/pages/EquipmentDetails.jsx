@@ -58,6 +58,12 @@ const EquipmentDetails = () => {
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.startTime >= formData.endTime) {
+      setBookingError('End time must be after start time.');
+      return;
+    }
+
     setBookingLoading(true);
     setBookingError('');
 
